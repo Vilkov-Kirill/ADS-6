@@ -1,96 +1,54 @@
-// Copyright 2022 NNTU-CS
 #ifndef INCLUDE_TPQUEUE_H_
 #define INCLUDE_TPQUEUE_H_
 
 #include <cassert>
 
-template<typename T>		// Берем первый добавленный, последний перезаписываем
+template<typename T, int size>
 class TPQueue {
 private:
-	T* arr;
+	T* arr = new T[size+1];
 	int top;
-	int curr;
-	int count;
-	int size;
+	int checkInd(int ind) {
+		while (ind < 0) ind += size;
+		while (ind > size) ind -= size;
+		return ind;
+	}
 public:
-	TPQueue(int = 100);
-	~TPQueue();
-	T get() const;
-	T pop();
-	void push(const T&);
-	bool isEmpty() const;
-	bool isFull() const;
-};
+	TPQueue(): top(0) {};
+	~TPQueue() { delete[] arr; }
 
-template<typename T>
-TPQueue<T>::TPQueue(int sizeQ) :
-	size(sizeQ),
-	top(0),
-	curr(0),
-	count(0)
-{
-	arr = new T[size + 1];
-}
-
-template<typename T>
-TPQueue<T>::~TPQueue() {
-	delete[] arr;
-}
-
-template<typename T>
-void TPQueue<T>::push(const T& data) {
-	assert(count < size);
-
-	if (count == 0) {
-		arr[curr++] = data;
-		count++;
-	} else {
-		int k = curr - 1;
-		bool flag = 0;
-		while (k >= top && data.prior > arr[k].prior) {
-			flag = 1;
-			arr[k + 1] = arr[k];
-			arr[k] = data;
-			k--;
-		}
-		if (flag == 0) arr[curr] = data;
-		curr++;
-		count++;
+	T pop() {
+		return arr[checkInd(top++)];
 	}
 
-	if (curr > size) curr -= size + 1;
-}
-
-template<typename T>
-T TPQueue<T>::pop() {
-	assert(count > 0);
-
-	T data = arr[top++];
-	count--;
-
-	if (top > size) top -= size + 1;
-	return data;
-}
-
-template<typename T>
-T TPQueue<T>::get() const {
-	assert(count > 0);
-	return arr[top];
-}
-
-template<typename T>
-bool TPQueue<T>::isEmpty() const {
-	return count == 0;
-}
-
-template<typename T>
-bool TPQueue<T>::isFull() const {
-	return count == size;
-}
+	void push(const T &data) {		// O(n)
+		if (arr[checkInd(top)].prior == -1) arr[checkInd(top)] = data;
+		else {
+			int i = top;
+			int flag = 0;
+			while (data.prior <= arr[checkInd(i)].prior) {		// for less or same prior
+				i++;
+				flag = 1;
+			}
+			if (flag == 1) {
+				if (arr[checkInd(i)].prior == -1) arr[checkInd(i)] = data;
+				else {
+					int k = i+1;
+					while (arr[checkInd(k)].prior != -1 && checkInd(k) != checkInd(top)) std::cout << checkInd(k++) << "  " << checkInd(top) << "\n";
+					if (checkInd(k) == checkInd(top)) top++;
+					arr[checkInd(k)] = arr[checkInd(k - 1)];
+					arr[checkInd(i)] = data;
+				}
+				return;
+			}
+			arr[checkInd(--top)] = data;	    // for higher prior
+		}
+	}
+};
 
 struct SYM {
 	char ch;
-	int prior;
+	int prior = -1;
 };
 
 #endif  // INCLUDE_TPQUEUE_H_
