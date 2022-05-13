@@ -34,7 +34,7 @@ public:
 				if (arr[checkInd(i)].prior == -1) arr[checkInd(i)] = data;
 				else {
 					int k = i+1;
-					while (arr[checkInd(k)].prior != -1 && checkInd(k) != checkInd(top)) std::cout << checkInd(k++) << "  " << checkInd(top) << "\n";
+					while (arr[checkInd(k)].prior != -1 && checkInd(k) != checkInd(top)) k++;
 					if (checkInd(k) == checkInd(top)) top++;
 					arr[checkInd(k)] = arr[checkInd(k - 1)];
 					arr[checkInd(i)] = data;
